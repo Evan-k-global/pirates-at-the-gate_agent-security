@@ -1,6 +1,24 @@
-# Witness
+# Pirates at the Gate
 
-A working proof of concept for controlling agent actions and preserving independently verifiable evidence. No real model or external target is attacked: a browser acts as the untrusted client, and a synthetic package registry is the protected service.
+Witness is a working proof of concept for controlling agent actions and preserving independently verifiable evidence. No real model or external target is attacked: a browser acts as the untrusted client, and a synthetic package registry is the protected service.
+
+## Why is a protocol layer needed for security?
+
+An agent can be prompted to follow a policy, but a prompt is still interpreted by the same system that proposes the action. A protocol layer moves the decision to a boundary the agent does not control. Every consequential request must pass through that boundary before it reaches the protected service.
+
+In this demo, the protocol issues a scoped mission, authenticates the run, checks the operation and resource, enforces replay and budget rules, and records the decision together with the synthetic service effect. It fails closed when the recorder is unavailable. The client can propose an action, but it cannot grant itself permission, bypass the gateway through the exposed API, sign the authoritative record, or change the policy after the fact.
+
+The protocol is also where different security mechanisms become one coherent guarantee. Isolation and egress controls restrict available paths; capability rules decide which path may be used; signatures identify the recorder; the zero-knowledge circuit proves that the recorded decisions followed the fixed policy; and an optional checkpoint makes a proof commitment independently discoverable. Cryptography alone cannot stop an action that bypasses the gateway, and a gateway without verifiable evidence asks observers to trust its operator. The protocol binds prevention and evidence at the same boundary.
+
+This is why the protocol remains useful without a blockchain. Its primary security job is pre-action mediation, fail-closed authorization, and evidence production. Chain publication is an optional distribution and coordination mechanism for the resulting commitment, not the source of the permission decision.
+
+## How does the protocol connect to the economic layer?
+
+The protocol layer produces the facts an economic layer needs: what authority was granted, which action was requested, whether it was allowed, which effect occurred, and which proof commits to that history. An economic layer can then attach stake, fees, insurance, reputation, escrow, or penalties to those verifiable facts.
+
+That relationship runs in one direction. Economics can reward compliant execution or make violations expensive only when the protocol mediates the action and produces evidence that a third party can verify. A bond cannot repair a bypassed gateway, an omitted event, or an ambiguous policy. Conversely, the protocol can enforce a mission locally even when no token, market, or settlement system is present.
+
+A production design could require an operator to post a bond before receiving a capability, release payment after a valid completion proof, and slash or withhold collateral when a signed trace proves a policy violation. The optional Zeko checkpoint supplies a common public commitment for such coordination. Separate contracts or dispute rules would define the actual financial consequences. This repository demonstrates the security evidence beneath that economic layer; it does not claim to implement staking, slashing, insurance, or Ethereum settlement.
 
 ## Can capable agents be constrained before alignment is solved?
 
