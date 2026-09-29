@@ -1,0 +1,15 @@
+{
+  "testedAt": "2026-09-29T18:46:32.357Z",
+  "proofsEnabled": true,
+  "passed": 7,
+  "checks": [
+    "Real proof verifies",
+    "Modified public statement rejected",
+    "Modified private witness rejected",
+    "Signed unauthorized dispatch rejected",
+    "Signed replay violation rejected",
+    "Signed budget violation rejected",
+    "Signed sequence gap rejected"
+  ],
+  "verificationKeyHash": "771192793505901776239223955535817115166914588850116859289448737917241162468"
+}

@@ -1,0 +1,12 @@
+{
+  "proofVerified": true,
+  "proofTests": 7,
+  "gatewayTests": 25,
+  "root": "21526169031076672060226225661757357025339869974041479094952141094968414722566",
+  "count": 8,
+  "dispatches": 3,
+  "checkpointDigest": "e2c84555e348d979db2468877aae985f686ecb5821898f3932f78aeae48c0af9",
+  "chainStatus": "pending",
+  "verifiedAt": "2026-09-29T18:46:32.357Z",
+  "verificationKeyDataSha256": "4d6f8601bcb1971bc9c8c738e5ee96d5cf631fd83d2a092a4f490442868d0670"
+}

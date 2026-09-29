@@ -1,0 +1,111 @@
+{
+  "testedAt": "2026-09-29T18:44:22.035Z",
+  "environment": "local Cloudflare Worker + D1 emulator",
+  "results": [
+    {
+      "name": "Unauthenticated operations rejected",
+      "passed": true
+    },
+    {
+      "name": "Fresh server-issued mission",
+      "passed": true
+    },
+    {
+      "name": "Malformed operation rejected",
+      "passed": true
+    },
+    {
+      "name": "Cross-origin mutation rejected",
+      "passed": true
+    },
+    {
+      "name": "Allowed read durably recorded with protected service effect",
+      "passed": true
+    },
+    {
+      "name": "Registry write denied without service effect",
+      "passed": true
+    },
+    {
+      "name": "External destination denied without any network fetch",
+      "passed": true
+    },
+    {
+      "name": "Other-run scope denied",
+      "passed": true
+    },
+    {
+      "name": "Replay denied",
+      "passed": true
+    },
+    {
+      "name": "Injected recorder outage fails closed with unchanged record and service",
+      "passed": true
+    },
+    {
+      "name": "Subsequent permitted reads within budget",
+      "passed": true
+    },
+    {
+      "name": "Fourth read exceeds mission budget",
+      "passed": true
+    },
+    {
+      "name": "Trace limit refuses overflow",
+      "passed": true
+    },
+    {
+      "name": "Independent verifier accepts sealed record",
+      "passed": true
+    },
+    {
+      "name": "Sealed run refuses new actions",
+      "passed": true
+    },
+    {
+      "name": "Seal retry returns identical checkpoint",
+      "passed": true
+    },
+    {
+      "name": "Event modification detected",
+      "passed": true
+    },
+    {
+      "name": "Event deletion detected",
+      "passed": true
+    },
+    {
+      "name": "Tail truncation detected",
+      "passed": true
+    },
+    {
+      "name": "Reordered events detected",
+      "passed": true
+    },
+    {
+      "name": "Wrong trust root rejected",
+      "passed": true
+    },
+    {
+      "name": "Wrong expected checkpoint rejected",
+      "passed": true
+    },
+    {
+      "name": "Editing a client copy leaves server record intact",
+      "passed": true
+    },
+    {
+      "name": "Concurrent identical requests never dispatch twice",
+      "passed": true
+    },
+    {
+      "name": "No API to delete authoritative events",
+      "passed": true
+    }
+  ],
+  "limits": [
+    "Recorder outage is fault injection, not a host-kill test.",
+    "The protected effect is a synthetic counter in the same atomic database update.",
+    "No OS sandbox, SSRF proxy, or network-isolation guarantee is tested."
+  ]
+}

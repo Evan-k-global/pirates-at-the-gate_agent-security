@@ -1,0 +1,14 @@
+import 'reflect-metadata';
+import {Mina,PrivateKey,AccountUpdate,Field,Bool,Cache,setNumberOfWorkers} from 'o1js';
+import {WitnessProgram,WitnessCheckpoint,WitnessProof} from './build/Witness.js';
+import fs from 'node:fs';import assert from 'node:assert/strict';
+setNumberOfWorkers(2);
+await WitnessProgram.compile({cache:Cache.FileSystem('cache')});await WitnessCheckpoint.compile({cache:Cache.FileSystem('cache')});
+const local=await Mina.LocalBlockchain({proofsEnabled:true});Mina.setActiveInstance(local);const payer=local.testAccounts[0];const k=PrivateKey.random(),address=k.toPublicKey(),contract=new WitnessCheckpoint(address);
+const proof=await WitnessProof.fromJSON(JSON.parse(fs.readFileSync('../public/evidence/proof.json')));
+const tx=await Mina.transaction(payer,async()=>{AccountUpdate.fundNewAccount(payer);await contract.deploy();});await tx.prove();await tx.sign([payer.key,k]).send();
+const publish=await Mina.transaction(payer,async()=>{await contract.publish(proof);});await publish.prove();await publish.sign([payer.key]).send();
+assert.equal(contract.root.get().toString(),proof.publicInput.root.toString());console.log('PASS Real proof accepted by checkpoint contract');
+await assert.rejects(()=>Mina.transaction(payer,async()=>{await contract.publish(proof);}));console.log('PASS Second publish rejected');
+await assert.rejects(async()=>{const rewrite=await Mina.transaction(payer,async()=>{const a=AccountUpdate.createSigned(address);a.body.update.appState[0]={isSome:Bool(true),value:Field(999)};});await rewrite.prove();await rewrite.sign([payer.key,k]).send();});console.log('PASS Contract key cannot rewrite proof-protected state');
+fs.writeFileSync('../public/evidence/contract-tests.json',JSON.stringify({testedAt:new Date().toISOString(),environment:'o1js local blockchain',proofsEnabled:true,passed:3,checks:['Real proof accepted by contract','Second publish rejected','Contract key cannot rewrite state']},null,2));

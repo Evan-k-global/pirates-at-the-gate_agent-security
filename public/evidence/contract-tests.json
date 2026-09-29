@@ -1,0 +1,11 @@
+{
+  "testedAt": "2026-09-29T18:53:20.594Z",
+  "environment": "o1js local blockchain",
+  "proofsEnabled": true,
+  "passed": 3,
+  "checks": [
+    "Real proof accepted by contract",
+    "Second publish rejected",
+    "Contract key cannot rewrite state"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "status": "pending",
+  "network": "Zeko Sepolia testnet",
+  "graphql": "https://sepolia.zeko.io/graphql",
+  "address": "B62qmk4WxakoqQqJZza2fhYzKChqESGojZRZd4nuL43pjhzsg8avWmm",
+  "reason": "Awaiting testnet funding; no chain inclusion claimed."
+}

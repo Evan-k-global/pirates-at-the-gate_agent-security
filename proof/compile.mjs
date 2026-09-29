@@ -1,0 +1,10 @@
+import 'reflect-metadata';
+import {Cache,setNumberOfWorkers} from 'o1js';
+import {WitnessProgram,WitnessCheckpoint} from './build/Witness.js';
+import fs from 'node:fs';
+setNumberOfWorkers(2);fs.mkdirSync('cache',{recursive:true});
+console.time('program');const p=await WitnessProgram.compile({cache:Cache.FileSystem('cache')});console.timeEnd('program');
+fs.writeFileSync('../public/evidence/verification-key.json',JSON.stringify(p.verificationKey,null,2));
+console.time('contract');const c=await WitnessCheckpoint.compile({cache:Cache.FileSystem('cache')});console.timeEnd('contract');
+fs.writeFileSync('../public/evidence/contract-verification-key.json',JSON.stringify(c.verificationKey,null,2));
+console.log('Real proof circuits compiled.');

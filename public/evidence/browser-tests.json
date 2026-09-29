@@ -1,0 +1,14 @@
+{
+  "testedAt": "2026-09-29T18:57:39.362515+00:00",
+  "desktop": "1200 px, full-page inspected",
+  "mobile": "390 px, no horizontal overflow",
+  "passed": [
+    "Adversarial suite: 8 recorded events, 3 dispatches, 5 denials",
+    "Sealed browser trace signature verification",
+    "Tampered browser trace rejected",
+    "Client view cleared and server record restored",
+    "Reference signatures verified in browser",
+    "README mobile layout inspected"
+  ],
+  "webMCP": "Tools implemented; validation unavailable because document.modelContext is not exposed in the test browser."
+}

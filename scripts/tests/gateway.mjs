@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {verifyBundle} from '../../lib/witness/protocol.mjs';
+const base=process.env.WITNESS_BASE_URL??'http://127.0.0.1:5173';let cookie='';const results=[];
+const test=async(name,fn)=>{await fn();results.push({name,passed:true});console.log('PASS',name);};
+async function call(body,expected=200,headers={}){const r=await fetch(base+'/api/lab',{method:'POST',headers:{'content-type':'application/json',cookie,...headers},body:JSON.stringify(body)});if(r.headers.get('set-cookie'))cookie=r.headers.get('set-cookie').split(';')[0];const raw=await r.text();let d;try{d=JSON.parse(raw);}catch{d={message:raw};}assert.equal(r.status,expected,JSON.stringify(d));return d;}
+const trust=await (await fetch(base+'/api/trust')).json();
+await test('Unauthenticated operations rejected',()=>call({action:'request',operation:'read',scope:'own',nonce:'first'},401));
+await test('Fresh server-issued mission',async()=>assert.equal((await call({action:'start'})).run.events.length,0));
+await test('Malformed operation rejected',()=>call({action:'request',operation:'exec',scope:'own',nonce:'first'},400));
+await test('Cross-origin mutation rejected',()=>call({action:'start'},403,{origin:'https://untrusted.invalid'}));
+let first;
+await test('Allowed read durably recorded with protected service effect',async()=>{first=await call({action:'request',operation:'read',scope:'own',nonce:'first'});assert.equal(first.run.dispatches,1);assert.equal(first.run.events.length,1);assert.equal(first.result.service.readCount,1);});
+await test('Registry write denied without service effect',async()=>{const d=await call({action:'request',operation:'write',scope:'own',nonce:'write'});assert.equal(d.result.decision,'denied');assert.equal(d.run.dispatches,1);});
+await test('External destination denied without any network fetch',async()=>{const d=await call({action:'request',operation:'read',scope:'external',nonce:'external'});assert.equal(d.result.dispatched,false);assert.equal(d.run.dispatches,1);});
+await test('Other-run scope denied',async()=>assert.equal((await call({action:'request',operation:'read',scope:'other',nonce:'other'})).result.dispatched,false));
+await test('Replay denied',async()=>assert.equal((await call({action:'request',operation:'read',scope:'own',nonce:'first'})).result.dispatched,false));
+await test('Injected recorder outage fails closed with unchanged record and service',async()=>{const before=await(await fetch(base+'/api/lab',{headers:{cookie}})).json();const d=await call({action:'outage'});assert.deepEqual(d.run,before.run);assert.equal(d.result.recorded,false);assert.equal(d.result.dispatched,false);});
+await test('Subsequent permitted reads within budget',async()=>{await call({action:'request',operation:'read',scope:'own',nonce:'second'});const d=await call({action:'request',operation:'read',scope:'own',nonce:'third'});assert.equal(d.run.dispatches,3);});
+await test('Fourth read exceeds mission budget',async()=>{const d=await call({action:'request',operation:'read',scope:'own',nonce:'fourth'});assert.equal(d.result.dispatched,false);assert.equal(d.run.dispatches,3);assert.equal(d.run.events.length,8);});
+await test('Trace limit refuses overflow',()=>call({action:'request',operation:'read',scope:'own',nonce:'overflow'},409));
+const sealed=await call({action:'export'});const bundle=sealed.bundle;
+await test('Independent verifier accepts sealed record',async()=>assert.equal((await verifyBundle(bundle,trust,bundle.checkpoint.digest)).valid,true));
+await test('Sealed run refuses new actions',()=>call({action:'request',operation:'read',scope:'own',nonce:'after-seal'},409));
+await test('Seal retry returns identical checkpoint',async()=>assert.deepEqual((await call({action:'export'})).bundle,bundle));
+await test('Event modification detected',async()=>{const d=structuredClone(bundle);d.events[0].fields[6]='0';await assert.rejects(()=>verifyBundle(d,trust,bundle.checkpoint.digest));});
+await test('Event deletion detected',async()=>{const d=structuredClone(bundle);d.events.splice(2,1);await assert.rejects(()=>verifyBundle(d,trust,bundle.checkpoint.digest));});
+await test('Tail truncation detected',async()=>{const d=structuredClone(bundle);d.events.pop();await assert.rejects(()=>verifyBundle(d,trust,bundle.checkpoint.digest));});
+await test('Reordered events detected',async()=>{const d=structuredClone(bundle);[d.events[0],d.events[1]]=[d.events[1],d.events[0]];await assert.rejects(()=>verifyBundle(d,trust,bundle.checkpoint.digest));});
+await test('Wrong trust root rejected',async()=>await assert.rejects(()=>verifyBundle(bundle,{recorder:'wrong-key'},bundle.checkpoint.digest)));
+await test('Wrong expected checkpoint rejected',async()=>await assert.rejects(()=>verifyBundle(bundle,trust,'0'.repeat(64))));
+await test('Editing a client copy leaves server record intact',async()=>{const copy=structuredClone(bundle);copy.events=[];assert.deepEqual((await call({action:'export'})).bundle,bundle);});
+await test('Concurrent identical requests never dispatch twice',async()=>{await call({action:'start'});const req={action:'request',operation:'read',scope:'own',nonce:'race'};const rs=await Promise.all([fetch(base+'/api/lab',{method:'POST',headers:{cookie,'content-type':'application/json'},body:JSON.stringify(req)}),fetch(base+'/api/lab',{method:'POST',headers:{cookie,'content-type':'application/json'},body:JSON.stringify(req)})]);assert(rs.every(r=>[200,409].includes(r.status)));const d=await(await fetch(base+'/api/lab',{headers:{cookie}})).json();assert.equal(d.run.dispatches,1);});
+await test('No API to delete authoritative events',async()=>{const r=await fetch(base+'/api/lab',{method:'DELETE',headers:{cookie}});assert.equal(r.status,405);});
+if(process.env.WITNESS_SAVE_REFERENCE==='1'){
+ fs.writeFileSync('public/evidence/reference-bundle.json',JSON.stringify(bundle,null,2));
+ fs.writeFileSync('public/evidence/trust.json',JSON.stringify(trust,null,2));
+ fs.writeFileSync('public/evidence/gateway-tests.json',JSON.stringify({testedAt:new Date().toISOString(),environment:'local Cloudflare Worker + D1 emulator',results,limits:['Recorder outage is fault injection, not a host-kill test.','The protected effect is a synthetic counter in the same atomic database update.','No OS sandbox, SSRF proxy, or network-isolation guarantee is tested.']},null,2));
+}
+console.log(JSON.stringify({passed:results.length,referenceCheckpoint:bundle.checkpoint.digest}));

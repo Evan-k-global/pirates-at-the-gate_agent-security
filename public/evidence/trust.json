@@ -1,0 +1,14 @@
+{
+  "version": "witness-trust-v1",
+  "recorder": "B62qo36XaXAU73vRgghNuNm6wiB4g8grqFRdvJMwpaw7FmXwvLC2opo",
+  "policy": {
+    "version": "witness-policy-v1",
+    "operation": "read",
+    "scope": "own",
+    "maxDispatches": 3,
+    "maxEvents": 8,
+    "recorderRequired": true
+  },
+  "signatureScheme": "Pallas Schnorr",
+  "scope": "Pinned server recorder; not a remote attestation of the host."
+}

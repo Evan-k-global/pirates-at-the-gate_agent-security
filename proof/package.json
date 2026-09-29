@@ -1,0 +1,1 @@
+{"name":"witness-proof","private":true,"type":"module","scripts":{"build":"tsc -p tsconfig.json","prove":"npm run build && node prove.mjs","verify":"node verify.mjs"},"dependencies":{"o1js":"2.14.0","reflect-metadata":"0.2.2"},"devDependencies":{"typescript":"5.9.3","@types/node":"22.19.19"}}
