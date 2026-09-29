@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import Client from 'mina-signer';
+const root=new URL('../',import.meta.url);
+const secret=new URL('.env',root);
+if(fs.existsSync(secret))throw Error('Existing .env retained. Use a fresh extracted copy to initialize another recorder.');
+const signer=new Client({network:'testnet'}),keys=signer.genKeys();
+fs.writeFileSync(secret,`WITNESS_RECORDER_KEY=${keys.privateKey}\n`,{flag:'wx',mode:0o600});
+fs.writeFileSync(new URL('config/runtime-trust.json',root),JSON.stringify({recorder:keys.publicKey},null,2)+'\n');
+console.log('Local recorder initialized. Private key saved only in .env; public browser trust pin updated.');
+console.log('Reference proof and reference recorder are unchanged.');

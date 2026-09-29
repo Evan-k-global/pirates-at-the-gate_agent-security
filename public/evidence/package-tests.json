@@ -1,0 +1,21 @@
+{
+  "testedAt": "2026-09-29T19:19:24.812758+00:00",
+  "environment": "fresh ZIP extraction with newly generated recorder and deployment keys",
+  "checks": {
+    "rootNpmCi": true,
+    "proofNpmCi": true,
+    "productionBuild": true,
+    "proofTypecheck": true,
+    "realReferenceProofVerified": true,
+    "gatewayTestsPassed": 25,
+    "deploymentConfigurationTestsPassed": 4,
+    "browserFreshRecorderSignaturesVerified": 8,
+    "initializersRefuseOverwrite": true,
+    "secretFileMode": "0600",
+    "liveTransactionsSubmitted": false
+  },
+  "priorUnchangedCircuitTests": {
+    "policyChecks": 7,
+    "realProofLocalContractChecks": 3
+  }
+}

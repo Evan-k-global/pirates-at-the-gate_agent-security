@@ -4,22 +4,26 @@
 
 Node 22 or later is required. Install dependencies with `npm ci`.
 
-Generate a Pallas recorder key using `mina-signer` and store it only in `.env` as `WITNESS_RECORDER_KEY`. This source release pins the published recorder in its browser verifier, proof constants, and independent verifier. A fork must explicitly update all three trust roots and recompile its contract; merely replacing the key is insufficient.
+Run `npm run setup:local` once in a fresh source extraction. It writes a new Pallas recorder secret to ignored `.env` (mode 0600) and its public key to `config/runtime-trust.json`. It refuses to overwrite an existing `.env`. The live-run browser verifier uses this explicit build-time public pin; it does not trust a key supplied by a downloaded bundle.
+
+The shipped reference evidence, proof constants, and reference verifier retain their separate published recorder identity. You can verify and deploy that historical proof without its private recorder key. Creating proofs for a new recorder requires a new captured trace, an explicit update to `proof/constants.ts` and the reference verifier trust pin, regeneration of proof/key artifacts, and a fresh contract. The local initializer does not silently replace reference evidence.
 
 The schema is in `db/schema.ts`. Build with `npm run build`, then initialize a new local database with:
 
 ```sh
 node --import ./scripts/sites-env.mjs node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_fast_arclight.sql
-npm run dev
+npm start
 ```
+
+`npm start` uses the production build locally and explicitly loads the root `.env`; optional `npm run dev` enables hot reloading. Use the URL printed by the server.
 
 Run the API tests against the printed URL:
 
 ```sh
-WITNESS_BASE_URL=http://127.0.0.1:5173 node scripts/tests/gateway.mjs
+WITNESS_BASE_URL=http://127.0.0.1:8787 node scripts/tests/gateway.mjs
 ```
 
-Set `WITNESS_SAVE_REFERENCE=1` only when intentionally replacing reference evidence. Replacing the reference requires regenerating its proof and deploying a new immutable checkpoint.
+Set `WITNESS_SAVE_REFERENCE=1` only when intentionally replacing reference evidence. Replacing the reference requires regenerating its proof; any optional chain publication uses a fresh immutable checkpoint.
 
 The public API has fixed synthetic operations only; it never fetches a caller-supplied URL or executes shell commands. Sessions use HttpOnly, SameSite cookies and a random capability token stored hashed in D1. Runs expire for API access after 24 hours; evidence exported before expiry remains verifiable. Runs are capped at 8 events and creation is limited to 30 per IP per hour. Raw IPs are not persisted. Public reference evidence has no session credential or secret key.
 
@@ -33,14 +37,14 @@ The external verifier additionally checks individual event signatures and the SH
 
 ```sh
 cd proof
-npm install
+npm ci
 npm run build
 node compile.mjs
 node prove.mjs
 node verify.mjs
 ```
 
-`proof/deploy.mjs` requires a funded Zeko Sepolia testnet deployer and a fresh checkpoint key in ignored `proof/private/` files. It enforces a small testnet fee ceiling and records transaction hashes before confirmation polling. It must never be pointed at a production network. Deployment is immutable per run: it verifies the proof and pins the recorder key, and it cannot replace a nonzero root through its publish method.
+See `SEPOLIA.md` for optional recipient-owned key creation, live read-only preflight, deployment, and verification. Chain publication and Ethereum settlement are excluded from this release acceptance criteria. The contract itself has passed real-proofs-enabled local deployment and immutability tests.
 
 ## Limits
 

@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {configuration,validateNetwork,accountMissing} from './network.mjs';
+const response={networkID:'zeko:testnet',signatureKind:'testnet',syncStatus:'SYNCED',daemonStatus:{chainId:'69420'},feePerWeightUnit:250,genesisConstants:{accountCreationFee:'2500'}};
+test('Sepolia endpoint and signing domain are fixed',()=>{assert.equal(configuration({}).signingNetwork,'testnet');assert.throws(()=>configuration({ZEKO_GRAPHQL:'https://testnet.zeko.io/graphql'}));assert.throws(()=>configuration({ZEKO_NETWORK_ID:'zeko:sepolia'}));});
+test('Wrong chain, unsynchronized node, and wrong signature domain fail closed',()=>{for(const patch of [{networkID:'mainnet'},{signatureKind:'mainnet'},{syncStatus:'BOOTSTRAP'},{daemonStatus:{chainId:'1'}}])assert.throws(()=>validateNetwork({...response,...patch},configuration({})));});
+test('Fee preflight distinguishes configured fee from quote and rejects excess',()=>{assert.equal(validateNetwork(response,configuration({})).configuredFee,'10000');assert.throws(()=>configuration({WITNESS_TX_FEE:'1000001'}));assert.throws(()=>validateNetwork({...response,feePerWeightUnit:20000},configuration({})));assert.throws(()=>validateNetwork({...response,genesisConstants:{accountCreationFee:'1000000000'}},configuration({})));});
+test('RPC failure cannot be mistaken for an absent account',()=>{assert(accountMissing({error:{statusCode:404}}));assert.equal(accountMissing({error:{statusCode:500}}),false);assert.equal(accountMissing({error:{statusCode:408}}),false);});

@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-09-29T19:15:48.979Z",
+  "graphql": "https://sepolia.zeko.io/graphql",
+  "signingNetwork": "testnet",
+  "networkID": "zeko:testnet",
+  "chainId": "69420",
+  "syncStatus": "SYNCED",
+  "nativeAsset": "sETH",
+  "accountCreationFee": "2500",
+  "feePerWeightUnit": 250,
+  "configuredFee": "10000",
+  "feeSource": "Configured total fee, not a transaction-weight quote",
+  "submitted": false
+}

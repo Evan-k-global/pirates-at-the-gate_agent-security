@@ -1,1 +1,23 @@
-{"name":"witness-proof","private":true,"type":"module","scripts":{"build":"tsc -p tsconfig.json","prove":"npm run build && node prove.mjs","verify":"node verify.mjs"},"dependencies":{"o1js":"2.14.0","reflect-metadata":"0.2.2"},"devDependencies":{"typescript":"5.9.3","@types/node":"22.19.19"}}
+{
+  "name": "witness-proof",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prove": "npm run build && node prove.mjs",
+    "verify": "node verify.mjs",
+    "setup:deployment": "node init-deployment.mjs",
+    "preflight": "node preflight.mjs",
+    "test:deployment": "node --test deployment.test.mjs",
+    "test:contract": "npm run build && node contract-test.mjs",
+    "deploy": "npm run build && node deploy.mjs"
+  },
+  "dependencies": {
+    "o1js": "2.14.0",
+    "reflect-metadata": "0.2.2"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "22.19.19"
+  }
+}

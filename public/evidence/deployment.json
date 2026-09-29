@@ -1,7 +1,7 @@
 {
-  "status": "pending",
+  "status": "not_requested",
   "network": "Zeko Sepolia testnet",
   "graphql": "https://sepolia.zeko.io/graphql",
-  "address": "B62qmk4WxakoqQqJZza2fhYzKChqESGojZRZd4nuL43pjhzsg8avWmm",
-  "reason": "Awaiting testnet funding; no chain inclusion claimed."
+  "address": null,
+  "reason": "Optional recipient deployment. This release includes a real proof and locally tested contract; no live checkpoint or Ethereum settlement is required or claimed."
 }
