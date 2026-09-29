@@ -15,6 +15,7 @@ assert.equal(proof.publicInput[2],statement.run);assert.equal(proof.publicInput[
 console.log('PASS: real ZK proof and disclosed synthetic trace match.');
 if(fs.existsSync(dir+'/deployment.json')){
  const d=read('deployment.json');if(d.status!=='included'){console.log('Chain checkpoint: not deployed.');process.exit(0);}
+ assert.equal(d.graphql,'https://sepolia.zeko.io/graphql');assert.equal(d.address,'B62qmk4WxakoqQqJZza2fhYzKChqESGojZRZd4nuL43pjhzsg8avWmm');assert.equal(d.verificationKeyHash,'15346760952952934163022021666273860883031171003091515451871358163741530902613','Unexpected checkpoint contract');
  const r=await fetch(d.graphql,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:'query { account(publicKey: "'+d.address+'") { zkappState verificationKey { hash } } }'})});
  const data=await r.json();const a=data.data?.account;assert(a,'Checkpoint account missing');assert.equal(a.zkappState[0],root);assert.equal(a.zkappState[1],statement.run);assert.equal(a.zkappState[2],String(statement.count));assert.equal(a.zkappState[3],String(statement.dispatches));assert.equal(a.verificationKey.hash,d.verificationKeyHash);
  console.log('PASS: live Zeko L2 checkpoint and contract key match. Ethereum finality is not established by this check.');
