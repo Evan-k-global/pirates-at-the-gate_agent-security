@@ -1,65 +1,48 @@
 # Pirates at the Gate
 
-Witness is a working proof of concept for controlling agent actions and preserving independently verifiable evidence. No real model or external target is attacked: a browser acts as the untrusted client, and a synthetic package registry is the protected service.
+Pirates at the Gate is a working proof of a ready-to-run agent security protocol: a capability gateway, fail-closed signed flight recorder, independent verifier, real zero-knowledge policy proof, and optional Zeko checkpoint in one package. Put it between an untrusted agent and the tools, credentials, or services it can affect. The agent may plan freely; consequences happen only after an external policy check, and every decision is bound to evidence the agent cannot forge through the exposed interface.
 
-## Why is a protocol layer needed for security?
+This directly addresses [the motivating article's central problem](https://blog.diogomonica.com/2026/09/28/ai-escapes-super-intelligence-or-super-incompetence/): containment and trustworthy evidence cannot depend on the same agent being contained. The demo uses a browser as the untrusted client and a synthetic package registry as the protected service, so it is safe to run and easy to inspect.
 
-An agent can be prompted to follow a policy, but a prompt is still interpreted by the same system that proposes the action. A protocol layer moves the decision to a boundary the agent does not control. Every consequential request must pass through that boundary before it reaches the protected service.
+## What blockchain is for
 
-In this demo, the protocol issues a scoped mission, authenticates the run, checks the operation and resource, enforces replay and budget rules, and records the decision together with the synthetic service effect. It fails closed when the recorder is unavailable. The client can propose an action, but it cannot grant itself permission, bypass the gateway through the exposed API, sign the authoritative record, or change the policy after the fact.
+Blockchain has three useful jobs here:
 
-The protocol is also where different security mechanisms become one coherent guarantee. Isolation and egress controls restrict available paths; capability rules decide which path may be used; signatures identify the recorder; the zero-knowledge circuit proves that the recorded decisions followed the fixed policy; and an optional checkpoint makes a proof commitment independently discoverable. Cryptography alone cannot stop an action that bypasses the gateway, and a gateway without verifiable evidence asks observers to trust its operator. The protocol binds prevention and evidence at the same boundary.
+1. Publish a proof commitment outside the operator's database, so the committed history cannot be quietly replaced later.
+2. Give auditors, insurers, counterparties, and dispute systems a common state to verify.
+3. Connect verified behavior to an economic layer: payment, escrow, bonds, reputation, insurance, or penalties.
 
-This is why the protocol remains useful without a blockchain. Its primary security job is pre-action mediation, fail-closed authorization, and evidence production. Chain publication is an optional distribution and coordination mechanism for the resulting commitment, not the source of the permission decision.
+It is not the sandbox, permission gate, monitor, or kill switch. Those controls must act before the side effect. Pirates at the Gate works without a chain; optional Zeko publication makes the resulting proof commitment public and composable. Zeko fits naturally because the policy proof and checkpoint contract are written with o1js. No live zkApp address or funded wallet is required for this release.
 
-## How does the protocol connect to the economic layer?
+## Why the protocol layer matters
 
-The protocol layer produces the facts an economic layer needs: what authority was granted, which action was requested, whether it was allowed, which effect occurred, and which proof commits to that history. An economic layer can then attach stake, fees, insurance, reputation, escrow, or penalties to those verifiable facts.
+A prompt is interpreted by the same system proposing the action. The protocol moves authorization to a boundary the agent does not control. It issues a scoped mission, authenticates the run, checks the operation and resource, rejects replay and budget violations, and records the decision with the synthetic service effect. If the recorder is unavailable, dispatch stops.
 
-That relationship runs in one direction. Economics can reward compliant execution or make violations expensive only when the protocol mediates the action and produces evidence that a third party can verify. A bond cannot repair a bypassed gateway, an omitted event, or an ambiguous policy. Conversely, the protocol can enforce a mission locally even when no token, market, or settlement system is present.
+That boundary ties prevention to evidence. Isolation limits available paths; capabilities decide which path may be used; signatures identify the recorder; the zero-knowledge circuit proves that the signed trace followed policy; and an optional checkpoint distributes the proof commitment. Cryptography cannot secure an action that bypasses the gateway, while a gateway without verifiable evidence asks everyone to trust its operator.
 
-A production design could require an operator to post a bond before receiving a capability, release payment after a valid completion proof, and slash or withhold collateral when a signed trace proves a policy violation. The optional Zeko checkpoint supplies a common public commitment for such coordination. Separate contracts or dispute rules would define the actual financial consequences. This repository demonstrates the security evidence beneath that economic layer; it does not claim to implement staking, slashing, insurance, or Ethereum settlement.
+The protocol also supplies the facts an economic layer needs: what authority was granted, what was requested, what was allowed, and what happened. Economics can then reward compliant execution or make violations costly. A bond cannot repair a bypassed gateway or an omitted event, so enforcement and evidence come first. This repository provides that security substrate; it does not claim to implement staking, slashing, insurance, or Ethereum settlement.
 
-## Can capable agents be constrained before alignment is solved?
+## What the proof of concept demonstrates
 
-For a defined boundary, permissions can be enforced without trusting the planner. This demo permits only reads from the current run’s registry, limits successful reads to three, and rejects writes, other scopes, and replayed operations. The server owns the policy and service operation. This does not establish universal AI containment.
+- A mission permits only reads from the current run's package registry, with a three-read budget.
+- Writes, external destinations, other-run access, replays, and excess reads are denied before dispatch.
+- An injected recorder outage produces no record and no service effect.
+- Signed evidence detects edits, deletion, truncation, and reordering.
+- A real o1js proof verifies the fixed policy, ordering, replay checks, recorder signature, and dispatch budget.
+- An included checkpoint contract can optionally publish the proof commitment on Zeko Sepolia.
 
-## Can agents rewrite the logs?
-
-The client cannot sign or change the server’s authoritative trace through the API. Each event has a Pallas signature, sequence, previous-event binding, and run/policy binding. Sealing signs the exact ordered trace. The verifier rejects edits, reordering, missing events, and truncated evidence against an expected terminal checkpoint. Clearing the browser view leaves the record intact.
-
-The gateway, signing key, database, and operator are trusted. Storage is logically append-only through the application API, not hardware write-once storage. A compromised recorder could omit events or lie before committing them. Independent retention and trusted checkpoint distribution are still required.
-
-## What happens when monitoring fails?
-
-The recorder-failure test injects a failure before dispatch: no new record or service effect is produced. The synthetic service counter and its signed event update atomically, and concurrent duplicate requests cannot execute twice. This is an injected failure test, not a killed-host, OS escape, or workload-termination test. Real external services require durable authorization, idempotent dispatch, result recording, and crash reconciliation.
-
-## Why use zero-knowledge proofs and a blockchain?
-
-A real o1js proof verifies that the recorder signed the exact reference trace, that its sequence and fixed policy are valid, that replay checks hold, and that the three-read budget was respected. Randomized event fields remain private inputs; the public statement contains the recorder, run/policy commitments, trace root, event count, and dispatch count. The synthetic reference trace is separately disclosed for reproducibility; proof verification itself does not require that disclosure.
-
-The checkpoint contract verifies the proof and pins the recorder key before accepting an immutable trace root. This release is complete without chain publication: it includes the contract, real proof, independent verifier, and optional Zeko Sepolia deployment scripts. No live zkApp address is required. L2 inclusion does not establish Ethereum finality. Signatures, proof validity, chain inclusion, and settlement are reported separately.
-
-Visitor runs have real signed evidence but are not automatically proved or anchored. The reference proof covers at most eight events. A production recorder would need batch aggregation, key rotation, retention, freshness policies, and independent witnesses.
-
-## Does this stop SSRF or create an air gap?
-
-No. The demo rejects an external-destination request without making a network request. It does not test a vulnerable proxy, DNS rebinding, kernel exploitation, or physical isolation. Real deployments must constrain both agent and downstream-service egress, remove alternate credentials and shared writable channels, and use isolated synthetic evaluation infrastructure. An air-gapped deployment records locally in a separate trusted domain and exports reviewed evidence offline; it does not connect the agent to a blockchain.
+The gateway, recorder key, database, and operator remain trusted. The synthetic atomic effect is narrower than a real external service. This is not universal AI containment, an OS sandbox, a hostile-model test, physical isolation, or proof that every possible side channel was captured. Visitor runs are signed but are not automatically ZK-proved.
 
 ## Run and verify
 
-Use the on-page adversarial suite, then **Seal & verify**, **Tamper with a copy**, and **Clear client view**. Download the evidence and source to verify independently.
-
 ```sh
-# Node 22+; from the source archive's witness-demo directory
+# Node 22+
 npm ci
 cd proof
 npm ci
 npm run verify
 ```
 
-The verifier pins the reference recorder and proof verification-key digest. To regenerate the proof, run `npm run prove` inside `proof/`. This compiles and proves with real cryptography; it does not use proofs-disabled simulation. The reference transcript is captured from the same gateway implementation via `scripts/tests/gateway.mjs`.
+The verifier pins the reference recorder and proof verification-key digest. To run a fresh gateway, return to the project root, run `npm run setup:local`, and follow `DEVELOPMENT.md`. Optional recipient-owned chain publication is documented in `SEPOLIA.md`.
 
-To run your own gateway, use `npm run setup:local` from the project root, then follow `DEVELOPMENT.md`. This creates your own secret and browser trust pin while preserving the independently verifiable reference proof. No wallet or blockchain funds are needed for the demo.
-
-Optional chain publication is documented in `SEPOLIA.md`: generate your own deployment keys, run the read-only network preflight, then deploy and verify if desired. No original operator keys or reserved address are needed. Never put a private key in the browser, evidence bundle, or source archive.
+The `.openai/hosting.json` file is the non-secret deployment manifest for the hosted demo. It declares the D1 database binding and the existing Sites project ID; it contains no credential or model configuration. Keep it to update that deployment, or remove it when deploying the application somewhere else. The local gateway and proof code do not depend on it.
