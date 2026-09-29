@@ -27,7 +27,7 @@ The protocol also supplies the facts an economic layer needs: what authority was
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
     A[Untrusted agent or client] -->|Proposed action| G[AMBA gateway]
     G --> P{Mission policy}
     P -->|Denied| R[Signed recorder]
