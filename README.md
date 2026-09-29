@@ -1,5 +1,7 @@
 # Pirates at the Gate
 
+> **Built on [Zeko Protocol](https://docs.zeko.io/).** Zeko is a ZK-rollup application layer for private, verifiable zkApps with Ethereum settlement. In this architecture, it is the verification and settlement layer for the agentic internet: agents can prove policy compliance over private data, publish shared commitments, and connect those proofs to machine-native payments, escrow, reputation, insurance, and penalties.
+
 Pirates at the Gate is a working proof of a ready-to-run agent security protocol: a capability gateway, fail-closed signed flight recorder, independent verifier, real zero-knowledge policy proof, and optional Zeko checkpoint in one package. Put it between an untrusted agent and the tools, credentials, or services it can affect. The agent may plan freely; consequences happen only after an external policy check, and every decision is bound to evidence the agent cannot forge through the exposed interface.
 
 This directly addresses [the motivating article's central problem](https://blog.diogomonica.com/2026/09/28/ai-escapes-super-intelligence-or-super-incompetence/): containment and trustworthy evidence cannot depend on the same agent being contained. The demo uses a browser as the untrusted client and a synthetic package registry as the protected service, so it is safe to run and easy to inspect.
