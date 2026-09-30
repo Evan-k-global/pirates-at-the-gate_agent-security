@@ -87,3 +87,7 @@ npm run verify
 The verifier pins the reference recorder and proof verification-key digest. To run a fresh gateway, return to the project root, run `npm run setup:local`, and follow `DEVELOPMENT.md`. Optional recipient-owned chain publication is documented in `SEPOLIA.md`.
 
 The `.openai/hosting.json` file is the non-secret deployment manifest for the hosted demo. It declares the D1 database binding and the existing Sites project ID; it contains no credential or model configuration. Keep it to update that deployment, or remove it when deploying the application somewhere else. The local gateway and proof code do not depend on it.
+
+## License
+
+This repository is part of the Zeko Agent Protocol Bundle and is licensed under [BUSL-1.1 with the Zeko Additional Use Grant](https://github.com/zeko-labs/agent-mission-bound-auth/blob/main/LICENSE), which expressly permits demonstration, research, audit, local, testnet, and proof-of-concept use. Third-party components retain their original license notices.
